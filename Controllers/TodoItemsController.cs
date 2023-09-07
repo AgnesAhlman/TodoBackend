@@ -23,6 +23,8 @@ namespace TodoApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
         {
+            Console.WriteLine("Standard Numeric Format Specifiers");
+
             var todoItems = await _context.TodoItems.ToListAsync();
             return todoItems;
         }
@@ -42,16 +44,25 @@ namespace TodoApi.Controllers
         }
 
         // PUT: api/TodoItems/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(long id, TodoItem todoItem)
+        public async Task<IActionResult> PutTodoItem(long id, TodoItem updatedTodoItem)
         {
-            if (id != todoItem.Id)
+            // Check if the requested TodoItem exists
+            var existingTodoItem = await _context.TodoItems.FindAsync(id);
+            if (existingTodoItem == null)
             {
-                return BadRequest();
+                return NotFound();
             }
-            todoItem.UpdatedAt = DateTime.UtcNow;
-            _context.Entry(todoItem).State = EntityState.Modified;
+
+            // Update only specific fields of the existing TodoItem
+            existingTodoItem.Name = updatedTodoItem.Name;
+            existingTodoItem.IsComplete = updatedTodoItem.IsComplete;
+
+            // Optionally, update the 'UpdatedAt' timestamp
+            existingTodoItem.UpdatedAt = DateTime.UtcNow;
+
+            // Set the state to Modified to let Entity Framework know it needs to be updated
+            _context.Entry(existingTodoItem).State = EntityState.Modified;
 
             try
             {
@@ -59,14 +70,7 @@ namespace TodoApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TodoItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
