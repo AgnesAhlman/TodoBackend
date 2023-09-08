@@ -23,7 +23,7 @@ namespace TodoApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
         {
-            Console.WriteLine("Standard Numeric Format Specifiers");
+            Console.WriteLine("Getting Todo Items...");
 
             var todoItems = await _context.TodoItems.ToListAsync();
             return todoItems;
@@ -45,7 +45,7 @@ namespace TodoApi.Controllers
 
         // PUT: api/TodoItems/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(long id, TodoItem updatedTodoItem)
+        public async Task<ActionResult<TodoItem>> PutTodoItem(long id, TodoItem updatedTodoItem)
         {
             // Check if the requested TodoItem exists
             var existingTodoItem = await _context.TodoItems.FindAsync(id);
@@ -73,7 +73,7 @@ namespace TodoApi.Controllers
                 throw;
             }
 
-            return NoContent();
+            return existingTodoItem;
         }
 
         [HttpPost]
